@@ -1,14 +1,13 @@
 const express = require("express");
+const socket = require("socket.io");
 
 const app = express();
 const server = app.listen(3000, () => {
     console.log("listening at 3000");
 });
-app.use(express.static("public"));
-
-const socket = require("socket.io");
-
 const io = socket(server);
+
+app.use(express.static("public"));
 
 io.sockets.on('connection', (socket) => {
     console.log("new connection: " + socket.id);
