@@ -1,10 +1,11 @@
 let socket;
+const BASE_URL = window.location.origin;
 
 function setup() {
     createCanvas(400, 400);
     background(51);
 
-    socket = io.connect("http://localhost:3000");
+    socket = io.connect(BASE_URL);
     socket.on('mouse', (data) => {
         noStroke();
         fill(255, 0, 0);
@@ -24,3 +25,4 @@ function mouseDragged() {
     fill(255);
     ellipse(mouseX, mouseY, 10, 10);
 }
+
