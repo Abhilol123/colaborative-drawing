@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: colab-drawing
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: drawing-service
+  namespace: colab-drawing
+spec:
+  selector:
+    app: drawing
+  type: LoadBalancer
+  ports:
+    - name: drawing-tcp
+      protocol: TCP
+      port: 80
+      targetPort: drawing-tcp
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: drawing
+  namespace: colab-drawing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: drawing
+  template:
+    metadata:
+      labels:
+        app: drawing
+    spec:
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 600
+      containers:
+      - name: drawing-nodejs
+        image: abhilol/drawing
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: '0.05'
+            memory: 64M
+          limits:
+            cpu: '0.20'
+            memory: 512M
+        env:
+        - name: NODEJS_PORT
+          value: "80"
+        ports:
+        - name: drawing-tcp
+          containerPort: 80
+        livenessProbe:
+          exec:
+            command: ['ash', '-c', 'nc -z localhost 80']
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 6
+          successThreshold: 1
+          initialDelaySeconds: 30
+        readinessProbe:
+          exec:
+            command: ['ash', '-c', 'nc -z localhost 80']
+          periodSeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 4
+          successThreshold: 2
+          initialDelaySeconds: 30
